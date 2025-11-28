@@ -10,7 +10,7 @@ const createOrder = async (req, res) => {
 
     try {
         const store = await prisma.store.findUnique({
-            where: { subdomain },
+            where: { username: subdomain },
         });
 
         if (!store) {
@@ -26,8 +26,8 @@ const createOrder = async (req, res) => {
                 customerEmail: customer.email,
                 customerPhone: customer.phone,
                 shippingAddress: customer.address,
-                shippingMethod: shippingMethod.label,
-                shippingCost: shippingMethod.fee,
+                shippingMethod: shippingMethod?.label || 'Standard',
+                shippingCost: shippingMethod?.fee || 0,
                 total: total,
                 status: 'PENDING',
                 items: {
@@ -47,8 +47,8 @@ const createOrder = async (req, res) => {
 
         res.status(201).json(order);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error creating order' });
+        console.error('Order creation error:', error);
+        res.status(500).json({ message: 'Server error creating order', error: error.message });
     }
 };
 
